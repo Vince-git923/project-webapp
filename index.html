@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.cdnfonts.com/css/technology" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/neuropol-x-free" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/gaufontoverdrive" rel="stylesheet">            
+    
+    <title>Data Baguio</title>
+</head>
+<body>
+    <div class = "title">
+        <div class="titleText">Data Baguio Monitoring System</div> 
+        
+          <button class="viewDataBtn">
+                View Data
+            </button>
+      
+        
+  
+    </div>
+    
+    <div class="content">
+        <div class="gasBox">
+           <div class="gas-cont">
+            <div class="wht">Gas Detection:</div>
+            <div class="disp gas" id="gasVal">No gas detected</div>
+           </div>
+        </div>
+        <div class="tempBox">
+            <div class="temp-cont">
+                <div class="wht">Temperature Reading:</div>
+            <div class="disp" id="tempVal" >0.00</div>
+            </div>
+        </div>
+        <div class="pressureBox">
+            <div class="pressure-cont">
+                <div class="wht">Pressure Reading:</div>
+            <div class="disp" id="pressureVal">0.00</div>
+            </div>
+        </div>
+
+    <div class="hiddenCont">
+            <div class="control">
+                <button class = "addData">Add Data</button>
+                <button class="closeView">X</button>
+            </div>
+            <div class="table">
+            <div class="grid bold">Test No.</div>
+            <div class="grid bold">Date</div>
+            <div class="grid bold">Type of Plastic</div>
+            <div class="grid bold">Process Time</div>
+            <div class="grid bold">Oil Yeild</div>
+            <div class="grid bold">Actions</div>
+           </div> 
+    </div>
+
+    <div class="inputData">
+            <div class="closeCont">
+                <button class="close1">X</button>
+            </div>
+            <label for="testId">Test Id:</label>
+            <input type="text" id="testId">
+            <label for="date">Date:</label>    
+            <input type="text" id = "date"> 
+            <label for="type">Type of Plastic:</label>
+            <input type="text" id = "type">
+            <label for="process">Process Time:</label>
+            <input type="text" id = "process">
+            <label for="oil">Oil Yeild:</label>
+            <input type="text" id = "oil">
+            <button class="addBtn">ADD</button>
+        
+    </div>
+
+    </div>
+   
+    <script src="index.js"></script>
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-app.js";
+        import {getDatabase, onValue, get, child,ref, set,remove,update} from "https://www.gstatic.com/firebasejs/9.19.1/firebase-database.js"; 
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+      
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyCsVh6ZgmVlv0JmCQaEsZ_86VBiR7TWQ3o",
+          authDomain: "databaguio.firebaseapp.com",
+          databaseURL: "https://databaguio-default-rtdb.asia-southeast1.firebasedatabase.app",
+          projectId: "databaguio",
+          storageBucket: "databaguio.appspot.com",
+          messagingSenderId: "979263279069",
+          appId: "1:979263279069:web:e192053fac09bbba6f7034"
+        };
+      
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+     
+        const db = getDatabase();
+    
+    
+        let tempval = document.querySelector("#tempVal");
+        let gasval = document.querySelector("#gasVal")
+        let pressureVal = document.querySelector("#pressureVal");
+        
+      
+        function getval(){
+            const dbRef = ref(db,'tempdata/tempval');
+            
+            onValue(dbRef,(snapshot)=>{
+               tempval.textContent = snapshot.val() + " °C";
+              
+            })
+
+            const dbRef1 = ref(db,'gasdata/gasval');
+            
+            onValue(dbRef1,(snapshot)=>{
+               gasval.textContent = snapshot.val();
+               
+            })
+
+            const dbRef2 = ref(db,'pressureData/pressureVal');
+            onValue(dbRef2,(snapshot)=>{
+               pressureVal.textContent = snapshot.val() + " psi";
+               
+            })
+            
+     
+        }
+
+    
+
+        let addToDB = document.querySelector(".addBtn")
+        let table = document.querySelector(".table")
+        let dateInput = document.querySelector("#date")
+        let typeInput = document.querySelector("#type")
+        let processInput = document.querySelector("#process")
+        let oilInput = document.querySelector("#oil")
+        let id = document.querySelector("#testId")
+       
+
+function writeUserData(testId, date, time, plastictype, oilyeild) {
+  const db = getDatabase();
+  
+  set(ref(db,`Testings/${testId}` ), {
+    TestId:testId,
+    time: time,
+    date: date,
+    yeild : oilyeild,
+    taypeofplastic: plastictype
+  });
+}
+
+
+ addToDB.addEventListener("click",()=>{
+
+ 
+    
+writeUserData(id.value,dateInput.value, processInput.value,typeInput.value, oilInput.value)
+
+   location.reload()
+  
+  
+ })
+
+
+
+
+
+
+
+
+ 
+  
+    const show = ref(db);
+ get(child(show, "Testings")) 
+ 
+.then((snapshot)=>{
+   
+snapshot.forEach(snap=>{
+
+        
+
+        let delBtn = document.createElement("button")
+        delBtn.classList.add("grids")
+        delBtn.classList.add("del")
+        delBtn.textContent = "DELETE"
+        delBtn.addEventListener("click",()=>{
+          
+            const db = getDatabase();
+            const dbRef = ref(db, `Testings/${snap.val().TestId}`);
+            
+     
+            location.reload()
+
+           
+          remove(dbRef)
+         
+          
+        })
+
+    snap.forEach(val=>{
+       
+        let grid = document.createElement("div")
+        grid.classList.add("grids")
+        grid.textContent= val.val()
+        table.appendChild(grid)
+        let grids = document.querySelectorAll(".grids")
+ 
+
+       
+        table.appendChild(delBtn)
+        
+    })
+    
+ })
+ 
+    })
+       
+    
+
+    
+
+
+
+
+
+    
+
+
+    
+   
+    
+      </script>
+
+</body>
+</html>
